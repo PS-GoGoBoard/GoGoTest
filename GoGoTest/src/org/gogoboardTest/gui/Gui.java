@@ -1,5 +1,7 @@
 package org.gogoboardTest.gui;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import javax.swing.ImageIcon;
 import org.hid4java.HidDevice;
 import org.hid4java.HidException;
@@ -14,10 +16,41 @@ import org.hid4java.event.HidServicesEvent;
  */
 public class Gui extends javax.swing.JFrame implements HidServicesListener {
 
-    private ImageIcon comGoGo;
-    private ImageIcon semGoGo;
     private HidServices servicosHID;
     private HidDevice gogoBoard;
+    private ImageIcon comGoGo;
+    private ImageIcon semGoGo;
+
+    private byte[] receberMensagem(int numBytes) {
+        byte[] mensagem = new byte[numBytes];
+        if (gogoBoard != null) {
+            gogoBoard.read(mensagem, 500);
+            return mensagem;
+        }
+        return null;
+    }
+
+    private short[] lerSensores() {
+        short[] sensores = new short[8];
+        try {
+            byte[] data = receberMensagem(64);
+            for (int i = 0; i < 8; i++) {
+                ByteBuffer bb = ByteBuffer.wrap(data, (2 * i) + 1, 2);
+                bb.order(ByteOrder.BIG_ENDIAN);
+                sensores[i] = bb.getShort();
+            }
+        } catch (Exception e) {
+            System.err.println("Não foi possivel ler os dados da GoGo Board");
+        }
+        return sensores;
+    }
+
+    private int lerSensor(int numSensor) {
+        if(numSensor >= 1 || numSensor <= 8){
+            return lerSensores()[numSensor-1];
+        }
+        return -1;
+    }
 
     private void carregarServicosHID() throws HidException {
         // Pegar os servicos HID e add listener
@@ -28,7 +61,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         for (HidDevice dispositivo : servicosHID.getAttachedHidDevices()) {
             if (dispositivo.getVendorId() == 0x461
                     && dispositivo.getProductId() == 0x20) {
-                System.out.println("GoGoBoard: " + dispositivo);
+                System.out.println("GoGo Board: " + dispositivo);
                 labelImagem.setIcon(comGoGo);
                 gogoBoard = servicosHID.getHidDevice(0x461, 0x20, null);
             }
@@ -40,13 +73,18 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         this.comGoGo = new ImageIcon("./imagens/board_found.png");
         this.semGoGo = new ImageIcon("./imagens/noboard_found.png");
         System.out.println("Iniciando Daemon...");
-        
+
         try {
             carregarServicosHID();
-        }catch (Exception e){
+            //lerSensores();
+            for (int i = 0; i < 100; i++) {
+                System.out.println(lerSensor(1));
+            }
+
+        } catch (Exception e) {
             System.err.println("HID Exception");
             e.printStackTrace();
-            throw  new RuntimeException("Erro ao carregar os serviços HID");
+            throw new RuntimeException("Erro ao carregar os serviços HID");
         }
     }
 
@@ -123,7 +161,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     public void hidDeviceAttached(HidServicesEvent hse) {
         if (hse.getHidDevice().getVendorId() == 0x461
                 && hse.getHidDevice().getProductId() == 0x20) {
-            System.out.println("GoGoBoard: " + hse.getHidDevice());
+            System.out.println("GoGo Board: " + hse.getHidDevice());
             labelImagem.setIcon(comGoGo);
             gogoBoard = servicosHID.getHidDevice(0x461, 0x20, null);
         }
@@ -133,7 +171,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     public void hidDeviceDetached(HidServicesEvent hse) {
         if (hse.getHidDevice().getVendorId() == 0x461
                 && hse.getHidDevice().getProductId() == 0x20) {
-            System.out.println("GoGoBoard: " + hse.getHidDevice());
+            System.out.println("GoGo Board: " + hse.getHidDevice());
             labelImagem.setIcon(semGoGo);
             gogoBoard = null;
         }
