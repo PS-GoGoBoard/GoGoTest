@@ -33,7 +33,11 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     private short[] lerSensores() {
         short[] sensores = new short[8];
         try {
-            byte[] data = receberMensagem(64);
+            byte[] data;
+            do {
+                data = receberMensagem(64);
+            } while (data[0] != 0);       // Evitar pegar valor zerado do sensor
+
             for (int i = 0; i < 8; i++) {
                 ByteBuffer bb = ByteBuffer.wrap(data, (2 * i) + 1, 2);
                 bb.order(ByteOrder.BIG_ENDIAN);
@@ -46,8 +50,8 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     }
 
     private int lerSensor(int numSensor) {
-        if(numSensor >= 1 || numSensor <= 8){
-            return lerSensores()[numSensor-1];
+        if (numSensor >= 1 || numSensor <= 8) {
+            return lerSensores()[numSensor - 1];
         }
         return -1;
     }
