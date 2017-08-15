@@ -81,9 +81,16 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         try {
             carregarServicosHID();
             //lerSensores();
-            for (int i = 0; i < 100; i++) {
-                System.out.println(lerSensor(1));
-            }
+
+            Runnable r = new Runnable() {
+                public void run() {
+                    while (gogoBoard != null){
+                        labelSensor1.setText(Integer.toString(lerSensor(1)));
+                    };                
+                }
+            };
+            Thread t = new Thread(r);
+            t.start();
 
         } catch (Exception e) {
             System.err.println("HID Exception");
@@ -97,18 +104,59 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     private void initComponents() {
 
         labelImagem = new javax.swing.JLabel();
+        labelSensor1 = new javax.swing.JLabel();
+        labelSensor2 = new javax.swing.JLabel();
+        labelSensor3 = new javax.swing.JLabel();
+        labelSensor4 = new javax.swing.JLabel();
+        labelSensor5 = new javax.swing.JLabel();
+        labelSensor6 = new javax.swing.JLabel();
+        labelSensor7 = new javax.swing.JLabel();
+        labelSensor8 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         labelImagem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/gogoboardTest/gui/imagens/noboard_found.png"))); // NOI18N
+
+        labelSensor1.setText("1024");
+
+        labelSensor2.setText("1024");
+
+        labelSensor3.setText("1024");
+
+        labelSensor4.setText("1024");
+
+        labelSensor5.setText("1024");
+
+        labelSensor6.setText("1024");
+
+        labelSensor7.setText("1024");
+
+        labelSensor8.setText("1024");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(19, 19, 19)
-                .addComponent(labelImagem)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor3, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor4, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor6, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor7, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor8, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(labelImagem))
                 .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -116,7 +164,17 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
             .addGroup(layout.createSequentialGroup()
                 .addGap(57, 57, 57)
                 .addComponent(labelImagem)
-                .addContainerGap(85, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor2, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor3, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor6, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor4, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor5, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor8, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(labelSensor7, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         pack();
@@ -159,6 +217,14 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel labelImagem;
+    private javax.swing.JLabel labelSensor1;
+    private javax.swing.JLabel labelSensor2;
+    private javax.swing.JLabel labelSensor3;
+    private javax.swing.JLabel labelSensor4;
+    private javax.swing.JLabel labelSensor5;
+    private javax.swing.JLabel labelSensor6;
+    private javax.swing.JLabel labelSensor7;
+    private javax.swing.JLabel labelSensor8;
     // End of variables declaration//GEN-END:variables
 
     @Override
