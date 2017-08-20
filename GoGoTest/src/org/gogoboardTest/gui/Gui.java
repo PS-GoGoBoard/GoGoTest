@@ -20,6 +20,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     private HidDevice gogoBoard;
     private ImageIcon comGoGo;
     private ImageIcon semGoGo;
+    private Thread threadExibirSensores;
 
     private void beep() {
         byte[] message = new byte[64];
@@ -81,11 +82,23 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         for (HidDevice dispositivo : servicosHID.getAttachedHidDevices()) {
             if (dispositivo.getVendorId() == 0x461
                     && dispositivo.getProductId() == 0x20) {
-                System.out.println("GoGo Board: " + dispositivo);
+                System.out.println("GoGo Board1: " + dispositivo);
                 labelImagem.setIcon(comGoGo);
                 gogoBoard = servicosHID.getHidDevice(0x461, 0x20, null);
             }
         }
+    }
+
+    private void exibirSensores() {
+        Runnable lerSensores;
+        lerSensores = () -> {
+            while (gogoBoard != null) {
+                labelSensor1.setText(Integer.toString(lerSensor(1)));
+            }
+        };
+        threadExibirSensores = new Thread(lerSensores);
+        threadExibirSensores.start();
+        System.out.println("iniciando " + threadExibirSensores.getName());
     }
 
     public Gui() {
@@ -96,19 +109,8 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
 
         try {
             carregarServicosHID();
-            //lerSensores();
-
-            Runnable r = new Runnable() {
-                public void run() {
-                    while (gogoBoard != null) {
-                        labelSensor1.setText(Integer.toString(lerSensor(1)));
-                    };
-                }
-            };
-            Thread t = new Thread(r);
-            t.start();
-
-        } catch (Exception e) {
+            exibirSensores();
+        } catch (HidException e) {
             System.err.println("HID Exception");
             e.printStackTrace();
             throw new RuntimeException("Erro ao carregar os serviços HID");
@@ -268,6 +270,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
             System.out.println("GoGo Board: " + hse.getHidDevice());
             labelImagem.setIcon(comGoGo);
             gogoBoard = servicosHID.getHidDevice(0x461, 0x20, null);
+            exibirSensores();
         }
     }
 
@@ -278,6 +281,8 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
             System.out.println("GoGo Board: " + hse.getHidDevice());
             labelImagem.setIcon(semGoGo);
             gogoBoard = null;
+            System.out.println("destruindo " + threadExibirSensores.getName());
+            threadExibirSensores.destroy();
         }
     }
 
