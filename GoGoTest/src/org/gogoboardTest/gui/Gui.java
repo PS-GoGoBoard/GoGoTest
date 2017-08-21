@@ -23,18 +23,31 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     private Thread threadExibirSensores;
 
     private void beep() {
-        byte[] message = new byte[64];
-        message[0] = (byte) 0;
-        message[1] = (byte) 0;
-        message[2] = (byte) 11;
-        message[3] = (byte) 0;
-        enviarMensagem(message);
+        byte[] mensagem = new byte[64];
+        mensagem[0] = 0;
+        mensagem[1] = 0;
+        mensagem[2] = 11;
+        mensagem[3] = 0;
+        enviarMensagem(mensagem);
     }
 
-    private void enviarMensagem(byte[] message) {
+    private void led(boolean ligar) {
+        byte[] mensagem = new byte[64];
+        mensagem[0] = 0;
+        mensagem[1] = 0;
+        mensagem[2] = 10;
+        mensagem[3] = 0;
+        if (ligar) {
+            mensagem[4] = 1;
+        } else {
+            mensagem[4] = 0;
+        }
+        enviarMensagem(mensagem);
+    }
+
+    private void enviarMensagem(byte[] mensagem) {
         if (gogoBoard != null) {
-            System.out.println("Beep");
-            gogoBoard.write(message, message.length, (byte) 0);
+            gogoBoard.write(mensagem, mensagem.length, (byte) 0);
         }
     }
 
@@ -93,7 +106,15 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         Runnable lerSensores;
         lerSensores = () -> {
             while (gogoBoard != null) {
-                labelSensor1.setText(Integer.toString(lerSensor(1)));
+                short[] sensores = lerSensores();
+                labelSensor1.setText(Integer.toString(sensores[0]));
+                labelSensor2.setText(Integer.toString(sensores[1]));
+                labelSensor3.setText(Integer.toString(sensores[2]));
+                labelSensor4.setText(Integer.toString(sensores[3]));
+                labelSensor5.setText(Integer.toString(sensores[4]));
+                labelSensor6.setText(Integer.toString(sensores[5]));
+                labelSensor7.setText(Integer.toString(sensores[6]));
+                labelSensor8.setText(Integer.toString(sensores[7]));
             }
         };
         threadExibirSensores = new Thread(lerSensores);
@@ -130,7 +151,9 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         labelSensor6 = new javax.swing.JLabel();
         labelSensor7 = new javax.swing.JLabel();
         labelSensor8 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        botaoBeep = new javax.swing.JButton();
+        botao = new javax.swing.JButton();
+        botaoLed = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -152,10 +175,24 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
 
         labelSensor8.setText("0");
 
-        jButton1.setText("jButton1");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        botaoBeep.setText("Beep");
+        botaoBeep.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                botaoBeepActionPerformed(evt);
+            }
+        });
+
+        botao.setText("Led");
+        botao.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botaoActionPerformed(evt);
+            }
+        });
+
+        botaoLed.setText("Led On\n");
+        botaoLed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botaoLedActionPerformed(evt);
             }
         });
 
@@ -164,12 +201,11 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(labelImagem)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton1)
+                            .addComponent(labelImagem)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
@@ -179,13 +215,20 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
                                 .addGap(18, 18, 18)
                                 .addComponent(labelSensor4, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(labelSensor5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(18, 18, 18)
-                        .addComponent(labelSensor6, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(labelSensor7, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(labelSensor8, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(labelSensor5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(labelSensor6, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(labelSensor7, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(labelSensor8, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(botaoBeep)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(botaoLed)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(botao)))
                 .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -194,7 +237,10 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
                 .addGap(57, 57, 57)
                 .addComponent(labelImagem)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(botaoBeep)
+                    .addComponent(botao)
+                    .addComponent(botaoLed))
                 .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -211,9 +257,26 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void botaoBeepActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoBeepActionPerformed
+        System.out.println("Beep");
         beep();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_botaoBeepActionPerformed
+
+    private void botaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoActionPerformed
+
+    }//GEN-LAST:event_botaoActionPerformed
+
+    private void botaoLedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoLedActionPerformed
+        if (botaoLed.isSelected()) {
+            led(true);
+            System.out.println("Led On");
+            botaoLed.setText("Led Off");
+        } else {
+            led(false);
+            System.out.println("Led Off");
+            botaoLed.setText("Led On");
+        }
+    }//GEN-LAST:event_botaoLedActionPerformed
 
     /**
      * @param args the command line arguments
@@ -251,7 +314,9 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton botao;
+    private javax.swing.JButton botaoBeep;
+    private javax.swing.JToggleButton botaoLed;
     private javax.swing.JLabel labelImagem;
     private javax.swing.JLabel labelSensor1;
     private javax.swing.JLabel labelSensor2;
