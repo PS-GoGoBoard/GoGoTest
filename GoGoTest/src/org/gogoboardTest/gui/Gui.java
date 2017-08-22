@@ -2,7 +2,12 @@ package org.gogoboardTest.gui;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.hid4java.HidDevice;
 import org.hid4java.HidException;
 import org.hid4java.HidManager;
@@ -24,19 +29,13 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
 
     private void beep() {
         byte[] mensagem = new byte[64];
-        mensagem[0] = 0;
-        mensagem[1] = 0;
         mensagem[2] = 11;
-        mensagem[3] = 0;
         enviarMensagem(mensagem);
     }
 
     private void led(boolean ligar) {
         byte[] mensagem = new byte[64];
-        mensagem[0] = 0;
-        mensagem[1] = 0;
         mensagem[2] = 10;
-        mensagem[3] = 0;
         if (ligar) {
             mensagem[4] = 1;
         } else {
@@ -45,19 +44,17 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         enviarMensagem(mensagem);
     }
 
-    private void enviarMensagem(byte[] mensagem) {
-        if (gogoBoard != null) {
-            gogoBoard.write(mensagem, mensagem.length, (byte) 0);
+    private void exibeTextoCurto(String texto) throws Exception {
+        if(texto.length() > 4){
+            JOptionPane.showMessageDialog(this, "O display de segmentos não pode exibir mais de 4 characteres.", "Erro!", JOptionPane.ERROR_MESSAGE);
+            //throw  new Exception("Erro, o display de segmentos não pode exibir mais de 4 characteres.");
         }
-    }
-
-    private byte[] receberMensagem(int numBytes) {
-        byte[] mensagem = new byte[numBytes];
-        if (gogoBoard != null) {
-            gogoBoard.read(mensagem, 500);
-            return mensagem;
+        byte[] mensagem = new byte[64];
+        mensagem[2] = 60;
+        for (int i = 0; i < texto.length(); i++) {
+            mensagem[3+i] = (byte) texto.charAt(i);
         }
-        return null;
+        enviarMensagem(mensagem);
     }
 
     private short[] lerSensores() {
@@ -73,7 +70,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
                 bb.order(ByteOrder.BIG_ENDIAN);
                 sensores[i] = bb.getShort();
             }
-        } catch (Exception e) {
+        } catch (HidException e) {
             System.err.println("Não foi possivel ler os dados da GoGo Board");
         }
         return sensores;
@@ -84,6 +81,21 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
             return lerSensores()[numSensor - 1];
         }
         return -1;
+    }
+
+    private void enviarMensagem(byte[] mensagem) {
+        if (gogoBoard != null) {
+            gogoBoard.write(mensagem, mensagem.length, (byte) 0);
+        }
+    }
+
+    private byte[] receberMensagem(int numBytes) {
+        byte[] mensagem = new byte[numBytes];
+        if (gogoBoard != null) {
+            gogoBoard.read(mensagem, 500);
+            return mensagem;
+        }
+        return null;
     }
 
     private void carregarServicosHID() throws HidException {
@@ -124,6 +136,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
 
     public Gui() {
         initComponents();
+        
         this.comGoGo = new ImageIcon("./imagens/board_found.png");
         this.semGoGo = new ImageIcon("./imagens/noboard_found.png");
         System.out.println("Iniciando Daemon...");
@@ -152,8 +165,9 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         labelSensor7 = new javax.swing.JLabel();
         labelSensor8 = new javax.swing.JLabel();
         botaoBeep = new javax.swing.JButton();
-        botao = new javax.swing.JButton();
+        botaoExibirTextoCurto = new javax.swing.JButton();
         botaoLed = new javax.swing.JToggleButton();
+        textFieldExibirTextoCurto = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -182,10 +196,10 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
             }
         });
 
-        botao.setText("Led");
-        botao.addActionListener(new java.awt.event.ActionListener() {
+        botaoExibirTextoCurto.setText("Exibir");
+        botaoExibirTextoCurto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                botaoActionPerformed(evt);
+                botaoExibirTextoCurtoActionPerformed(evt);
             }
         });
 
@@ -201,35 +215,39 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(labelImagem)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor3, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor4, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor6, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor7, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(labelSensor8, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(labelSensor2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor3, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor4, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor5, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor6, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor7, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelSensor8, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
                         .addComponent(botaoBeep)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(botaoLed)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(botao)))
-                .addContainerGap(19, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(textFieldExibirTextoCurto, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(botaoExibirTextoCurto)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap(16, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(labelImagem, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -239,8 +257,9 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(botaoBeep)
-                    .addComponent(botao)
-                    .addComponent(botaoLed))
+                    .addComponent(botaoExibirTextoCurto)
+                    .addComponent(botaoLed)
+                    .addComponent(textFieldExibirTextoCurto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(34, 34, 34)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelSensor1, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -255,6 +274,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void botaoBeepActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoBeepActionPerformed
@@ -262,9 +282,13 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
         beep();
     }//GEN-LAST:event_botaoBeepActionPerformed
 
-    private void botaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoActionPerformed
-
-    }//GEN-LAST:event_botaoActionPerformed
+    private void botaoExibirTextoCurtoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoExibirTextoCurtoActionPerformed
+        try {
+            exibeTextoCurto(textFieldExibirTextoCurto.getText());
+        } catch (Exception ex) {
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_botaoExibirTextoCurtoActionPerformed
 
     private void botaoLedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoLedActionPerformed
         if (botaoLed.isSelected()) {
@@ -288,20 +312,15 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Gui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Gui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Gui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Gui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -314,8 +333,8 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton botao;
     private javax.swing.JButton botaoBeep;
+    private javax.swing.JButton botaoExibirTextoCurto;
     private javax.swing.JToggleButton botaoLed;
     private javax.swing.JLabel labelImagem;
     private javax.swing.JLabel labelSensor1;
@@ -326,6 +345,7 @@ public class Gui extends javax.swing.JFrame implements HidServicesListener {
     private javax.swing.JLabel labelSensor6;
     private javax.swing.JLabel labelSensor7;
     private javax.swing.JLabel labelSensor8;
+    private javax.swing.JTextField textFieldExibirTextoCurto;
     // End of variables declaration//GEN-END:variables
 
     @Override
